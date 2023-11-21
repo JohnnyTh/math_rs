@@ -10,6 +10,8 @@ pub fn concat<T: Scalar + Clone + num_traits::Zero>(
 ) -> Result<DMatrix<T>, Box<dyn Error>> {
     let n_rows: usize;
     let n_cols: usize;
+    let idx_insert_row: usize;
+    let idx_insert_col: usize;
 
     if *axis == 0 {
         // row axis
@@ -22,6 +24,9 @@ pub fn concat<T: Scalar + Clone + num_traits::Zero>(
         }
         n_rows = matrix_1.nrows() + matrix_2.nrows();
         n_cols = matrix_1.ncols();
+
+        idx_insert_row = matrix_1.nrows();
+        idx_insert_col = 0;
     } else {
         // col axis
         if matrix_1.nrows() != matrix_2.nrows() {
@@ -33,32 +38,18 @@ pub fn concat<T: Scalar + Clone + num_traits::Zero>(
         }
         n_rows = matrix_1.nrows();
         n_cols = matrix_1.ncols() + matrix_2.ncols();
+
+        idx_insert_row = 0;
+        idx_insert_col = matrix_1.ncols();
     }
     let mut matrix_concat: DMatrix::<T> = DMatrix::from_fn(n_rows, n_cols, |_i, _j| T::zero());
 
-    for (idx_row, row) in matrix_1.row_iter().enumerate() {
-        for (idx_col, elem) in row.column_iter().enumerate() {
-            matrix_concat[(idx_row, idx_col)] = elem[(0, 0)].clone();
-        }
-    }
+    matrix_concat.view_mut((0, 0), (matrix_1.nrows(), matrix_1.ncols())).copy_from(matrix_1);
+    matrix_concat.view_mut(
+        (idx_insert_row, idx_insert_col),
+        (matrix_2.nrows(), matrix_2.ncols()),
+    ).copy_from(matrix_2);
 
-    for (idx_row, row) in matrix_2.row_iter().enumerate() {
-        let idx_row_concat: usize;
-        if *axis == 0 {
-            idx_row_concat = idx_row + matrix_1.nrows();
-        } else {
-            idx_row_concat = idx_row;
-        }
-        for (idx_col, elem) in row.column_iter().enumerate() {
-            let idx_col_concat: usize;
-            if *axis == 0 {
-                idx_col_concat = idx_col;
-            } else {
-                idx_col_concat = idx_col + matrix_1.ncols();
-            }
-            matrix_concat[(idx_row_concat, idx_col_concat)] = elem[(0, 0)].clone();
-        }
-    }
     return Ok(matrix_concat);
 }
 
