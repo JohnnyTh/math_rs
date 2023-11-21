@@ -14,7 +14,7 @@ pub fn test_concat_col() {
     let mat_expected: DMatrix::<f64> = DMatrix::from_column_slice(
         4, 3, &[5., 5., 5., 5., 10., 66., 66., 10., 11., 11., 11., 11.],
     );
-    let mat_concat = ops_nalgebra::concat(mat_1, mat_2, 1);
+    let mat_concat = ops_nalgebra::concat(&mat_1, &mat_2, &1);
 
     match mat_concat {
         Ok(mat_concat) => {
@@ -38,7 +38,7 @@ pub fn test_concat_row() {
             6., 6., 6., 6., 11., 11., 11., 11.
         ],
     );
-    let mat_concat = ops_nalgebra::concat(mat_1, mat_2, 0);
+    let mat_concat = ops_nalgebra::concat(&mat_1, &mat_2, &0);
 
     match mat_concat {
         Ok(mat_concat) => {
@@ -52,8 +52,9 @@ pub fn test_concat_row() {
 
 #[cfg(test)]
 mod tests {
-    use super::test_concat_row;
-    use super::test_concat_col;
+    use test_concat_row;
+    use test_concat_col;
+
     use std::sync::Once;
 
     static INIT: Once = Once::new();

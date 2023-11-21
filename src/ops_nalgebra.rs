@@ -6,12 +6,12 @@ use nalgebra::{DMatrix, Scalar};
 
 
 pub fn concat<T: Scalar + Clone + num_traits::Zero>(
-    matrix_1: DMatrix<T>, matrix_2: DMatrix<T>, axis: u8,
+    matrix_1: &DMatrix<T>, matrix_2: &DMatrix<T>, axis: &u8,
 ) -> Result<DMatrix<T>, Box<dyn Error>> {
     let n_rows: usize;
     let n_cols: usize;
 
-    if axis == 0 {
+    if *axis == 0 {
         // row axis
         if matrix_1.ncols() != matrix_2.ncols() {
             let msg = format!(
@@ -44,14 +44,14 @@ pub fn concat<T: Scalar + Clone + num_traits::Zero>(
 
     for (idx_row, row) in matrix_2.row_iter().enumerate() {
         let idx_row_concat: usize;
-        if axis == 0 {
+        if *axis == 0 {
             idx_row_concat = idx_row + matrix_1.nrows();
         } else {
             idx_row_concat = idx_row;
         }
         for (idx_col, elem) in row.column_iter().enumerate() {
             let idx_col_concat: usize;
-            if axis == 0 {
+            if *axis == 0 {
                 idx_col_concat = idx_col;
             } else {
                 idx_col_concat = idx_col + matrix_1.ncols();
