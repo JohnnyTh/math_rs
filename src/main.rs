@@ -1,11 +1,14 @@
-extern crate log;
-extern crate env_logger;
+use std::env;
+use log::info;
+use env_logger::builder;
 
-use log::{info};
+mod algorithms;
+mod ops_nalgebra;
+use crate::algorithms::LinearRegression;
 
 fn main() {
-    std::env::set_var("RUST_LOG", "info");
-    env_logger::builder().format_timestamp_millis().init();
+    env::set_var("RUST_LOG", "info");
+    builder().format_timestamp_millis().init();
 
     info!("first message");
 }

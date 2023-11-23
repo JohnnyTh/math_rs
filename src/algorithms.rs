@@ -1,19 +1,31 @@
-extern crate nalgebra;
-
 use std::fmt;
-use nalgebra::{DMatrix};
+use std::error::Error;
+use nalgebra::{DMatrix, linalg::try_invert_to};
 
-#[derive(Debug)]
-pub enum ValidationError {
+use crate::ops_nalgebra::concat;
+
+#[derive(Debug, Clone)]
+pub enum AlgorithmError {
     DimensionMismatch,
+    MatrixInversionError,
 }
 
-impl fmt::Display for ValidationError {
+impl fmt::Display for AlgorithmError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            ValidationError::DimensionMismatch =>
-                write!(f, "First dimensions of data matrix and labels matrix do not match.")
+            AlgorithmError::DimensionMismatch =>
+                write!(f, "First dimensions of data matrix and labels matrix do not match."),
+            AlgorithmError::MatrixInversionError =>
+                write!(f, "Could not ")
         }
+    }
+}
+
+impl Error for AlgorithmError {}
+
+impl From<Box<dyn Error>> for AlgorithmError {
+    fn from(_: Box<dyn Error>) -> Self {
+        AlgorithmError::DimensionMismatch
     }
 }
 
@@ -24,20 +36,26 @@ pub struct LinearRegression {
 }
 
 impl LinearRegression {
-    pub fn fit(&mut self, data: DMatrix<f64>, labels: DMatrix<f64>) ->
-    Result<(), ValidationError> {
+    pub fn fit(&mut self, data: &DMatrix<f64>, labels: &DMatrix<f64>) ->
+    Result<(), AlgorithmError> {
         if data.nrows() != labels.nrows() {
-            return Err(ValidationError::DimensionMismatch);
+            return Err(AlgorithmError::DimensionMismatch);
         }
-        //let data_ = na::DMatrix::<f64>::from_element(data.nrows(), 1, 1.0);
 
-        //  ndarray::concatenate!(
-        //     Axis(1),
-        //     Array::<f64, Ix2>::ones((data.shape()[0], 1)),
-        //     data
-        // );
-        // let xtx = data_.t().dot(&data_);
-        // let xy = data_.t().dot(&labels);
+        let data_w_bias = concat(&DMatrix::<f64>::zeros(data.nrows(), 1), data, &1)?;
+        let mut xtxi = DMatrix::<f64>::zeros(data_w_bias.nrows(), data_w_bias.ncols());
+
+        let xtx = data_w_bias.transpose() * &data_w_bias;
+        let xy = data_w_bias.transpose() * labels;
+
+        let inv_succ = try_invert_to(xtx, &mut xtxi);
+        if !inv_succ {
+            return Err(AlgorithmError::MatrixInversionError);
+        }
+        let params = xtxi * xy;
+
+        self.intercept = params.view((0, 0), (labels.nrows(), 1)).clone_owned();
+        self.slope = params.view((0, 1), (params.nrows(), params.ncols())).clone_owned();
 
         Ok(())
     }

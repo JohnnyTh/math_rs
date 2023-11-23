@@ -11,7 +11,7 @@ pub fn test_concat_col() {
     let mat_1 = DMatrix::<f64>::from_column_slice(4, 1, &[5., 5., 5., 5.]);
     let mat_2 = DMatrix::<f64>::from_column_slice(4, 2, &[10., 66., 66., 10., 11., 11., 11., 11.]);
 
-    let mat_expected: DMatrix::<f64> = DMatrix::from_column_slice(
+    let mat_expected: DMatrix<f64> = DMatrix::from_column_slice(
         4, 3, &[5., 5., 5., 5., 10., 66., 66., 10., 11., 11., 11., 11.],
     );
     let mat_concat = ops_nalgebra::concat(&mat_1, &mat_2, &1);
@@ -32,7 +32,7 @@ pub fn test_concat_row() {
     let mat_2 = DMatrix::<f64>::from_column_slice(
         4, 2, &[10., 66., 66., 10., 11., 11., 11., 11.],
     );
-    let mat_expected: DMatrix::<f64> = DMatrix::from_column_slice(
+    let mat_expected: DMatrix<f64> = DMatrix::from_column_slice(
         8, 2, &[
             5., 5., 5., 5., 10., 66., 66., 10.,
             6., 6., 6., 6., 11., 11., 11., 11.
@@ -52,10 +52,12 @@ pub fn test_concat_row() {
 
 #[cfg(test)]
 mod tests {
-    use test_concat_row;
-    use test_concat_col;
+    use super::test_concat_row;
+    use super::test_concat_col;
 
     use std::sync::Once;
+    use log::info;
+    use nalgebra::DMatrix;
 
     static INIT: Once = Once::new();
 
@@ -76,5 +78,15 @@ mod tests {
     fn run_test_concat_row() {
         setup();
         test_concat_row();
+    }
+
+    #[test]
+    fn run_test_matmul() {
+        setup();
+        let mat_1 = DMatrix::<f64>::from_row_slice(3, 2, &[5., 10., 5., 10., 5., 10.]);
+        let mat_2 = DMatrix::<f64>::from_row_slice(2, 2, &[1., 10., 1., 10.]);
+
+        let mat_mul = mat_1 * mat_2;
+        info!("Matmul result: {}", mat_mul);
     }
 }

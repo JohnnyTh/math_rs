@@ -9,8 +9,8 @@ use criterion::{Criterion, criterion_group, criterion_main};
 use rand::{Rng};
 use std::time::Instant;
 
-#[path = "../src/ops_nalgebra.rs"]
-mod ops_nalgebra;
+#[path = "ops.rs"]
+mod ops;
 
 pub fn test_performance_nalgebra_concat(c: &mut Criterion) {
     c.bench_function("concat large matrices", |b| b.iter(|| {
@@ -23,7 +23,7 @@ pub fn test_performance_nalgebra_concat(c: &mut Criterion) {
         let mat2 = DMatrix::<f64>::from_vec(n_elements, n_elements, data2);
 
         let start = Instant::now();
-        let _ = ops_nalgebra::concat(&mat1, &mat2, &0);
+        let _ = ops::concat(&mat1, &mat2, &0);
         info!(
             "Concatenated mat_1 [{}x{}] and mat_2 [{}x{}] Time elapsed: {}ms",
             mat1.nrows(),

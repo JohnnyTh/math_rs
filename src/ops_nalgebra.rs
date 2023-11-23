@@ -1,9 +1,5 @@
-extern crate nalgebra;
-extern crate num_traits;
-
 use std::error::Error;
 use nalgebra::{DMatrix, Scalar};
-
 
 pub fn concat<T: Scalar + Clone + num_traits::Zero>(
     matrix_1: &DMatrix<T>, matrix_2: &DMatrix<T>, axis: &u8,
@@ -18,7 +14,7 @@ pub fn concat<T: Scalar + Clone + num_traits::Zero>(
         if matrix_1.ncols() != matrix_2.ncols() {
             let msg = format!(
                 "Cannot concatenate two matrices along {} \
-                with != number of columns", axis.to_string()
+            with != number of columns", axis.to_string()
             );
             return Err(msg.into());
         }
@@ -32,7 +28,7 @@ pub fn concat<T: Scalar + Clone + num_traits::Zero>(
         if matrix_1.nrows() != matrix_2.nrows() {
             let msg = format!(
                 "Cannot concatenate two matrices along {} \
-                with != number of rows", axis.to_string()
+            with != number of rows", axis.to_string()
             );
             return Err(msg.into());
         }
@@ -42,7 +38,7 @@ pub fn concat<T: Scalar + Clone + num_traits::Zero>(
         idx_insert_row = 0;
         idx_insert_col = matrix_1.ncols();
     }
-    let mut matrix_concat: DMatrix::<T> = DMatrix::from_fn(n_rows, n_cols, |_i, _j| T::zero());
+    let mut matrix_concat: DMatrix<T> = DMatrix::from_fn(n_rows, n_cols, |_i, _j| T::zero());
 
     matrix_concat.view_mut((0, 0), (matrix_1.nrows(), matrix_1.ncols())).copy_from(matrix_1);
     matrix_concat.view_mut(
@@ -52,4 +48,3 @@ pub fn concat<T: Scalar + Clone + num_traits::Zero>(
 
     return Ok(matrix_concat);
 }
-
