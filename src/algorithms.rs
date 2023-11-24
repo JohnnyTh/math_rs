@@ -31,11 +31,19 @@ impl From<Box<dyn Error>> for AlgorithmError {
 
 pub struct LinearRegression {
     n_threads: u8,
-    slope: DMatrix<f64>,
-    intercept: DMatrix<f64>,
+    slope: Option<DMatrix<f64>>,
+    intercept: Option<DMatrix<f64>>,
 }
 
 impl LinearRegression {
+    pub fn new(n_threads: u8) -> LinearRegression {
+        LinearRegression {
+            n_threads,
+            slope: None,
+            intercept: None,
+        }
+    }
+
     pub fn fit(&mut self, data: &DMatrix<f64>, labels: &DMatrix<f64>) ->
     Result<(), AlgorithmError> {
         if data.nrows() != labels.nrows() {
@@ -54,8 +62,8 @@ impl LinearRegression {
         }
         let params = xtxi * xy;
 
-        self.intercept = params.view((0, 0), (labels.nrows(), 1)).clone_owned();
-        self.slope = params.view((0, 1), (params.nrows(), params.ncols())).clone_owned();
+        self.intercept = Some(params.view((0, 0), (labels.nrows(), 1)).clone_owned());
+        self.slope = Some(params.view((0, 1), (params.nrows(), params.ncols())).clone_owned());
 
         Ok(())
     }

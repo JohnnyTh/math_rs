@@ -10,5 +10,6 @@ fn main() {
     env::set_var("RUST_LOG", "info");
     builder().format_timestamp_millis().init();
 
-    info!("first message");
+    let lr = LinearRegression::new(1);
+    //lr.fit();
 }
